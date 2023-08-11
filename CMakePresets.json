@@ -1,0 +1,167 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 24,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "ninja",
+      "hidden": true,
+      "description": "Generate Ninja project files",
+      "generator": "Ninja"
+    },
+    {
+      "name": "x64-debug",
+      "hidden": true,
+      "architecture": {
+        "value": "x64",
+        "strategy": "external"
+      },
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "x64-release",
+      "hidden": true,
+      "architecture": {
+        "value": "x64",
+        "strategy": "external"
+      },
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "default",
+      "hidden": true,
+      "description": "Default configuration presets",
+      "inherits": [ "ninja" ],
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "installDir": "${sourceDir}/out/install/${presetName}"
+    },
+    {
+      "name": "windows-default",
+      "hidden": true,
+      "inherits": "default",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "clang-cl"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      },
+      "vendor": {
+        "microsoft.com/VisualStudioSettings/CMake/1.0": {
+          "intellisenseMode": "windows-clang-x64"
+        }
+      }
+    },
+    {
+      "name": "linux-default",
+      "hidden": true,
+      "inherits": "default",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      },
+      "vendor": {
+        "microsoft.com/VisualStudioSettings/CMake/1.0": {
+          "hostOS": [ "Linux" ]
+        },
+        "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": {
+          "sourceDir": "$env{HOME}/.vs/${sourceDirName}",
+          "forceWSL1Toolset": true
+        },
+        "jetbrains.com/clion": {
+          "toolchain": "WSL"
+        }
+      }
+    },
+    {
+      "name": "x64-windows-debug",
+      "displayName": "x64 Debug",
+      "inherits": [ "windows-default", "x64-debug" ],
+      "cacheVariables": {
+        "CMAKE_C_FLAGS_DEBUG": "/std:c17 /Zi -fsanitize=undefined /Wall"
+      }
+    },
+    {
+      "name": "x64-windows-release",
+      "displayName": "x64 Release",
+      "inherits": [ "windows-default", "x64-release" ],
+      "cacheVariables": {
+        "CMAKE_C_FLAGS_RELEASE": "/std:c17 /O2"
+      }
+    },
+    {
+      "name": "x64-linux-debug",
+      "displayName": "x64 Debug",
+      "inherits": [ "linux-default", "x64-debug" ],
+      "cacheVariables": {
+        "CMAKE_C_FLAGS_DEBUG": "-Wall -Wextra -pedantic -fms-extensions -g3 -ggdb3  -fsanitize=address -fsanitize=leak -fsanitize=undefined -fno-omit-frame-pointer"
+      }
+    },
+    {
+      "name": "x64-linux-release",
+      "displayName": "x64 Release",
+      "inherits": [ "linux-default", "x64-release" ],
+      "cacheVariables": {
+        "CMAKE_C_FLAGS_RELEASE": "-Wall -Wextra -pedantic -fms-extensions -O3"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "x64-windows-debug",
+      "configurePreset": "x64-windows-debug"
+    },
+    {
+      "name": "x64-windows-release",
+      "configurePreset": "x64-windows-release"
+    },
+    {
+      "name": "x64-linux-debug",
+      "configurePreset": "x64-linux-debug"
+    },
+    {
+      "name": "x64-linux-release",
+      "configurePreset": "x64-linux-release"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "default",
+      "hidden": true,
+      "output": { "outputOnFailure": true },
+      "execution": {
+        "noTestsAction": "ignore",
+        "stopOnFailure": false
+      }
+    },
+    {
+      "name": "x64-windows-debug",
+      "inherits": "default",
+      "configurePreset": "x64-windows-debug"
+    },
+    {
+      "name": "x64-windows-release",
+      "inherits": "default",
+      "configurePreset": "x64-windows-release"
+    },
+    {
+      "name": "x64-linux-debug",
+      "inherits": "default",
+      "configurePreset": "x64-linux-debug"
+    },
+    {
+      "name": "x64-linux-release",
+      "inherits": "default",
+      "configurePreset": "x64-linux-release"
+    }
+  ]
+}
