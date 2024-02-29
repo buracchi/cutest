@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.24)
+cmake_minimum_required(VERSION 3.27)
 
 option(CUTEST_BUILD_TESTS "Build tests" ON)
 option(CUTEST_ENABLE_TEST_COVERAGE "Enable coverage reporting" OFF)
@@ -12,7 +12,7 @@ project(cutest
 set(CMAKE_DISABLE_SOURCE_CHANGES ON)
 set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
 set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_C_STANDARD 17)
+set(CMAKE_C_STANDARD 23)
 set(CMAKE_C_EXTENSIONS OFF)
 
 if (CUTEST_INSTALL)
