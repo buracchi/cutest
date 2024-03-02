@@ -60,8 +60,9 @@ target_link_libraries(cutest INTERFACE $<BUILD_INTERFACE:coverage_config>)
 set_target_properties(cutest PROPERTIES PREFIX ${CUTEST_LIBRARY_PREFIX})
 
 add_library(cutest_main "src/cutest_main.c")
-target_link_libraries(cutest_main PRIVATE cutest)
-target_link_libraries(cutest_main INTERFACE $<BUILD_INTERFACE:coverage_config>)
+target_link_libraries(cutest_main
+                      INTERFACE $<BUILD_INTERFACE:coverage_config>
+                      PRIVATE cutest)
 set_target_properties(cutest_main PROPERTIES PREFIX ${CUTEST_LIBRARY_PREFIX})
 
 if (CUTEST_BUILD_TESTS)

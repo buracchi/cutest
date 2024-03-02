@@ -103,7 +103,7 @@
       "displayName": "x64 Debug",
       "inherits": [ "linux-default", "x64-debug" ],
       "cacheVariables": {
-        "CMAKE_C_FLAGS_DEBUG": "-Wall -Wextra -pedantic -fms-extensions -g3 -ggdb3  -fsanitize=address -fsanitize=leak -fsanitize=undefined -fno-omit-frame-pointer"
+        "CMAKE_C_FLAGS_DEBUG": "-Wall -Wextra -pedantic -fms-extensions -g3 -ggdb3 -fsanitize=address -fsanitize=leak -fsanitize=undefined -fno-omit-frame-pointer"
       }
     },
     {
