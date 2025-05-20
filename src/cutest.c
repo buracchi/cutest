@@ -58,7 +58,7 @@ extern void cutest_destroy(struct cutest *cutest) {
 	free(cutest);
 }
 
-extern struct cutest_test_suite *cutest_test_suite_add(struct cutest cutest[1], const char suite_name[static 1]) {
+extern struct cutest_test_suite *cutest_test_suite_add(struct cutest cutest[static 1], const char suite_name[static 1]) {
 	if (cutest->capacity == cutest->size) {
 		cutest->capacity *= 2;
 		size_t new_size = cutest->capacity * sizeof(struct cutest_test_suite);
@@ -84,7 +84,7 @@ extern struct cutest_test_suite *cutest_test_suite_add(struct cutest cutest[1], 
 	return &cutest->suite[cutest->size - 1];
 }
 
-extern struct cutest_test_suite *cutest_test_suite_get(struct cutest cutest[1], const char suite_name[static 1]) {
+extern struct cutest_test_suite *cutest_test_suite_get(struct cutest cutest[static 1], const char suite_name[static 1]) {
 	for (size_t i = 0; i < cutest->size; i++) {
 		if (strcmp(cutest->suite[i].name, suite_name) == 0) {
 			return &cutest->suite[i];
@@ -93,7 +93,7 @@ extern struct cutest_test_suite *cutest_test_suite_get(struct cutest cutest[1], 
 	return nullptr;
 }
 
-extern struct cutest_test *cutest_test_add(struct cutest cutest[1],
+extern struct cutest_test *cutest_test_add(struct cutest cutest[static 1],
                                            const char suite_name[static 1],
                                            const char test_name[static 1],
                                            void test()) {
@@ -130,16 +130,18 @@ extern struct cutest_test *cutest_test_add(struct cutest cutest[1],
 extern void cutest_test_fail_(const char test_function_name[static 8],
                               const char file[static 1],
                               int line,
-                              const char *fmessage, ...) {
+                              const char *fmessage,
+                              ...) {
 	struct cutest_test *test;
 	va_list args;
 	va_start(args, fmessage);
+	fprintf(stderr, "%s:%d: Failure\n", file, line);
 	test = find_test(test_function_name);
 	assert((test != nullptr) && "CuTest assert macros must be called within a test.");
 	if (test != nullptr) {
 		test->result = false;
-		fprintf(stderr, "%s:%d: Failure\n", file, line);
 		vfprintf(stderr, fmessage, args);
+		fprintf(stderr, "\n");
 	}
 	va_end(args);
 }
