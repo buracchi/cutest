@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 3.27)
 
-option(CUTEST_BUILD_TESTS "Build tests" ON)
-option(CUTEST_ENABLE_TEST_COVERAGE "Enable coverage reporting" OFF)
-option(CUTEST_INSTALL "Generate installation target" ON)
+option(BURACCHI_CUTEST_BUILD_EXAMPLES "Build cutest's example programs." ON)
+option(BURACCHI_CUTEST_BUILD_TESTS "Build cutest's own tests." ON)
+option(BURACCHI_CUTEST_TESTS_COVERAGE "Enable cutest's own tests coverage reporting" OFF)
+option(BURACCHI_CUTEST_INSTALL "Enable installation of cutest. (Projects embedding cutest may want to turn this OFF.)" ON)
 
 project(cutest
         DESCRIPTION "A unit testing library for the C programming language inspired by GoogleTest."
@@ -15,64 +16,57 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_STANDARD 23)
 set(CMAKE_C_EXTENSIONS OFF)
 
-if (CUTEST_INSTALL)
-    include(GNUInstallDirs)
-    include(CMakePackageConfigHelpers)
-endif ()
-
-if (CUTEST_BUILD_TESTS)
-    include(CTest)
-    enable_testing()
-endif ()
 
 add_library(coverage_config INTERFACE)
-
-if (CUTEST_ENABLE_TEST_COVERAGE)
+if(BURACCHI_CUTEST_TESTS_COVERAGE)
     target_compile_options(coverage_config INTERFACE -O0 -g --coverage)
     target_link_options(coverage_config INTERFACE --coverage)
-endif ()
+endif()
 
-if (CUTEST_INSTALL)
-    set(CUTEST_EXPORT_NAME "buracchi-${PROJECT_NAME}")
-    set(CUTEST_NAMESPACE "buracchi::${PROJECT_NAME}")
-    set(CUTEST_LIBRARY_PREFIX "libburacchi-${PROJECT_NAME}-")
+if(BURACCHI_CUTEST_INSTALL)
+    include(GNUInstallDirs)
+    include(CMakePackageConfigHelpers)
+
+    set(BURACCHI_CUTEST_PACKAGE_NAME "buracchi-${PROJECT_NAME}" CACHE INTERNAL "")
+    set(BURACCHI_CUTEST_LIBRARY_PREFIX "libburacchi-${PROJECT_NAME}-" CACHE INTERNAL "")
+    set(BURACCHI_CUTEST_TARGETS_EXPORT_NAME "${BURACCHI_CUTEST_PACKAGE_NAME}-targets" CACHE INTERNAL "")
+    set(BURACCHI_CUTEST_GENERATED_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated" CACHE INTERNAL "")
+    set(BURACCHI_CUTEST_CMAKE_FILES_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/${BURACCHI_CUTEST_PACKAGE_NAME}")
+    set(BURACCHI_CUTEST_CONFIG_FILE "${BURACCHI_CUTEST_GENERATED_DIR}/${BURACCHI_CUTEST_PACKAGE_NAME}-config.cmake")
 
     configure_package_config_file(
             "${PROJECT_SOURCE_DIR}/config.cmake.in"
-            "${PROJECT_BINARY_DIR}/${CUTEST_EXPORT_NAME}-config.cmake"
-            INSTALL_DESTINATION
-            "${CMAKE_INSTALL_DATAROOTDIR}/${CUTEST_EXPORT_NAME}")
+            "${BURACCHI_CUTEST_CONFIG_FILE}"
+            INSTALL_DESTINATION "${BURACCHI_CUTEST_CMAKE_FILES_INSTALL_DIR}")
 
     install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/cmake/"
-            DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/${CUTEST_EXPORT_NAME}/cmake")
+            DESTINATION "${BURACCHI_CUTEST_CMAKE_FILES_INSTALL_DIR}/cmake")
 
-    install(FILES
-            "${CMAKE_CURRENT_BINARY_DIR}/${CUTEST_EXPORT_NAME}-config.cmake"
-            DESTINATION
-            "${CMAKE_INSTALL_DATAROOTDIR}/${CUTEST_EXPORT_NAME}")
-endif ()
+    install(FILES "${BURACCHI_CUTEST_CONFIG_FILE}"
+            DESTINATION "${BURACCHI_CUTEST_CMAKE_FILES_INSTALL_DIR}")
+endif()
 
 add_library(cutest "src/cutest.c")
-target_include_directories(cutest PUBLIC
+target_include_directories(cutest SYSTEM PUBLIC
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-                           "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
+                           "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
 target_link_libraries(cutest INTERFACE $<BUILD_INTERFACE:coverage_config>)
-set_target_properties(cutest PROPERTIES PREFIX ${CUTEST_LIBRARY_PREFIX})
+set_target_properties(cutest PROPERTIES PREFIX ${BURACCHI_CUTEST_LIBRARY_PREFIX})
+add_library(buracchi::cutest::cutest ALIAS cutest)
 
 add_library(cutest_main "src/cutest_main.c")
+target_include_directories(cutest_main SYSTEM PUBLIC
+                           "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+                           "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
 target_link_libraries(cutest_main
                       INTERFACE $<BUILD_INTERFACE:coverage_config>
-                      PRIVATE cutest)
-set_target_properties(cutest_main PROPERTIES PREFIX ${CUTEST_LIBRARY_PREFIX})
+                      PUBLIC cutest)
+set_target_properties(cutest_main PROPERTIES PREFIX ${BURACCHI_CUTEST_LIBRARY_PREFIX})
+add_library(buracchi::cutest::cutest_main ALIAS cutest_main)
 
-if (CUTEST_BUILD_TESTS)
-    include(cmake/CuTestDiscoverTests.cmake)
-    add_subdirectory("test")
-endif ()
-
-if (CUTEST_INSTALL)
+if(BURACCHI_CUTEST_INSTALL)
     install(TARGETS cutest cutest_main
-            EXPORT cutest-targets
+            EXPORT ${BURACCHI_CUTEST_TARGETS_EXPORT_NAME}
             LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
             ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
             RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -82,8 +76,16 @@ if (CUTEST_INSTALL)
             DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
             FILES_MATCHING PATTERN "*.h*")
 
-    install(EXPORT cutest-targets
-            FILE ${CUTEST_EXPORT_NAME}-targets.cmake
-            NAMESPACE ${CUTEST_NAMESPACE}::
-            DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/${CUTEST_EXPORT_NAME}")
-endif ()
+    install(EXPORT ${BURACCHI_CUTEST_TARGETS_EXPORT_NAME}
+            NAMESPACE buracchi::${PROJECT_NAME}::
+            DESTINATION ${BURACCHI_CUTEST_CMAKE_FILES_INSTALL_DIR})
+endif()
+
+if(BURACCHI_CUTEST_BUILD_TESTS)
+    include(CTest)
+    include(cmake/CuTestDiscoverTests.cmake)
+
+    enable_testing()
+
+    add_subdirectory("test")
+endif()
