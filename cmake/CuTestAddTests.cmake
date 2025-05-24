@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.27)
+cmake_minimum_required(VERSION 3.31)
 
 function(add_command name test_name)
     set(args "")

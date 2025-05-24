@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.27)
+cmake_minimum_required(VERSION 3.31)
 
 option(BURACCHI_CUTEST_BUILD_EXAMPLES "Build cutest's example programs." ON)
 option(BURACCHI_CUTEST_BUILD_TESTS "Build cutest's own tests." ON)
@@ -46,11 +46,13 @@ if(BURACCHI_CUTEST_INSTALL)
             DESTINATION "${BURACCHI_CUTEST_CMAKE_FILES_INSTALL_DIR}")
 endif()
 
-add_library(cutest "src/cutest.c")
+add_library(cutest "src/cutest.c" "src/fpa.c")
 target_include_directories(cutest SYSTEM PUBLIC
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
                            "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
-target_link_libraries(cutest INTERFACE $<BUILD_INTERFACE:coverage_config>)
+target_link_libraries(cutest
+                      INTERFACE $<BUILD_INTERFACE:coverage_config>
+                      PUBLIC m)
 set_target_properties(cutest PROPERTIES PREFIX ${BURACCHI_CUTEST_LIBRARY_PREFIX})
 add_library(buracchi::cutest::cutest ALIAS cutest)
 

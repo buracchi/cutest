@@ -47,3 +47,19 @@ TEST(asserts, string_case_insensitive_equality) {
 TEST(asserts, string_case_insensitive_inequality) {
 	ASSERT_STRCASE_NE("test_string", "ANOTHER_STRING");
 }
+
+TEST(asserts, float_equality) {
+	ASSERT_FLOAT_EQ(1.0f, 1.0f);
+}
+
+TEST(asserts, double_equality) {
+	ASSERT_DOUBLE_EQ(1.0, 1.0);
+}
+
+TEST(asserts, long_double_equality) {
+	ASSERT_LONG_DOUBLE_EQ(1.0L, 1.0L);
+}
+
+TEST(asserts, near) {
+	EXPECT_NEAR(1.0 * 1, 2.0 * 1, 1 * 2.0);
+}
